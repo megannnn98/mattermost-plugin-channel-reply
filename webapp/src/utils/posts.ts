@@ -1,7 +1,7 @@
 import type {Post} from '@mattermost/types/posts';
 import type {UserProfile} from '@mattermost/types/users';
 
-import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE} from '../constants';
+import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from '../constants';
 
 type MattermostState = {
     entities: {
@@ -98,16 +98,32 @@ function stripMobileQuotePrefix(message: string): string {
     return message.slice(separatorIndex + 2);
 }
 
-export function getQuotedPostDisplayMessage(post: Post): string {
-    const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
-    if (typeof bodyFromProps === 'string') {
-        return bodyFromProps;
-    }
+function isQuotedReplyPost(post: Post): boolean {
+    return (post.type as string) === QUOTED_REPLY_POST_TYPE || Boolean(post.props?.[QUOTED_REPLY_PROP]);
+}
 
+export function getQuotedReplyBody(post: Post): string {
     const message = post.message || '';
-    if (post.type === QUOTED_REPLY_POST_TYPE) {
-        return stripMobileQuotePrefix(message);
+
+    if (isQuotedReplyPost(post)) {
+        const stripped = stripMobileQuotePrefix(message);
+        if (stripped) {
+            return stripped;
+        }
+
+        const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
+        if (typeof bodyFromProps === 'string') {
+            return bodyFromProps;
+        }
     }
 
     return message;
+}
+
+export function getQuotedPostDisplayMessage(post: Post): string {
+    if (isQuotedReplyPost(post)) {
+        return getQuotedReplyBody(post);
+    }
+
+    return post.message || '';
 }

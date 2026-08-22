@@ -5,15 +5,20 @@ import type {Post} from '@mattermost/types/posts';
 import type {GlobalState} from '@mattermost/types/store';
 
 import {getPermalinkUrl, navigateToQuotedPost} from '../actions/navigateToPost';
-import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_PROP} from '../constants';
-import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
+import {QUOTED_REPLY_PROP} from '../constants';
+import {getPostFromState, getUserFromState, getDisplayName, getQuotedReplyBody} from '../utils/posts';
 import ReplyQuote from './ReplyQuote';
+
+type PostFormatOptions = {
+    postId?: string;
+    editedAt?: number;
+};
 
 declare global {
     interface Window {
         PostUtils: {
-            formatText: (message: string) => string;
-            messageHtmlToComponent: (html: string, isRHS?: boolean) => React.ReactNode;
+            formatText: (message: string, options?: PostFormatOptions) => string;
+            messageHtmlToComponent: (html: string, isRHS?: boolean, options?: PostFormatOptions) => React.ReactNode;
         };
     }
 }
@@ -55,8 +60,16 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
         void navigateToQuotedPost(store, replyToPostId);
     }, [replyToPostId, store]);
 
-    const replyBody = (post.props?.[QUOTED_REPLY_BODY_PROP] as string | undefined) ?? post.message ?? '';
-    const formattedText = window.PostUtils.formatText(replyBody);
+    const replyBody = getQuotedReplyBody(post);
+    const formattedBody = useMemo(() => {
+        const formatOptions: PostFormatOptions = {
+            postId: post.id,
+            editedAt: post.edit_at || 0,
+        };
+        const formattedText = window.PostUtils.formatText(replyBody, formatOptions);
+
+        return window.PostUtils.messageHtmlToComponent(formattedText, false, formatOptions);
+    }, [post.edit_at, post.id, replyBody]);
 
     return (
         <div className='quoted-reply-post'>
@@ -71,7 +84,7 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
                 />
             )}
             <div className='quoted-reply-post__body'>
-                {window.PostUtils.messageHtmlToComponent(formattedText)}
+                {formattedBody}
             </div>
         </div>
     );
