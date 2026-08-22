@@ -64,6 +64,7 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
                 <ReplyQuote
                     post={replyPost}
                     username={getDisplayName(replyUser)}
+                    user={replyUser}
                     permalink={permalink}
                     onNavigate={handleQuoteClick}
                     compact={true}

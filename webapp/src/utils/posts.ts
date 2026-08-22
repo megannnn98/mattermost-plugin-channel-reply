@@ -41,6 +41,36 @@ export function getDisplayName(user?: UserProfile): string {
     return user.username;
 }
 
+export function getUserAvatarUrl(user?: UserProfile): string | null {
+    if (!user?.id) {
+        return null;
+    }
+
+    return `/api/v4/users/${user.id}/image?_=${user.last_picture_update || 0}`;
+}
+
+export function getUserAvatarFallbackUrl(user?: UserProfile): string | null {
+    if (!user?.id) {
+        return null;
+    }
+
+    return `/api/v4/users/${user.id}/image/default`;
+}
+
+export function getUserInitials(user?: UserProfile): string {
+    const displayName = getDisplayName(user);
+    if (displayName === 'Unknown user') {
+        return '?';
+    }
+
+    const parts = displayName.trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+
+    return displayName.slice(0, 2).toUpperCase();
+}
+
 export function truncateMessage(message: string, maxLength = 500): string {
     const normalized = message.replace(/\s+/g, ' ').trim();
     if (normalized.length <= maxLength) {
