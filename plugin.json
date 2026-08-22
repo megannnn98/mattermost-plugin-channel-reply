@@ -1,0 +1,15 @@
+{
+    "id": "com.github.mattermost-plugin-quoted-reply",
+    "name": "Quoted Reply",
+    "description": "Adds a Reply button to messages and renders quoted replies with clickable references in Mattermost.",
+    "version": "1.0.0",
+    "min_server_version": "9.0.0",
+    "webapp": {
+        "bundle_path": "webapp/dist/main.js"
+    },
+    "settings_schema": {
+        "header": "Enables a Reply action on message hover and quote blocks for replies.",
+        "footer": "",
+        "settings": []
+    }
+}
