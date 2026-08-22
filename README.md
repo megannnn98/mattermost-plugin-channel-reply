@@ -42,7 +42,7 @@ make dist
 This installs webapp dependencies, builds `webapp/dist/main.js`, and creates:
 
 ```
-dist/com.github.mattermost-channel-reply-1.1.1.tar.gz
+dist/com.github.mattermost-channel-reply-1.1.2.tar.gz
 ```
 
 Other commands:
@@ -64,14 +64,14 @@ make clean    # remove dist/ and node_modules/
 ### mmctl
 
 ```bash
-mmctl plugin upload dist/com.github.mattermost-channel-reply-1.1.1.tar.gz
+mmctl plugin upload dist/com.github.mattermost-channel-reply-1.1.2.tar.gz
 mmctl plugin enable com.github.mattermost-channel-reply
 ```
 
 ### API
 
 ```bash
-mmctl plugin upload dist/com.github.mattermost-channel-reply-1.1.1.tar.gz
+mmctl plugin upload dist/com.github.mattermost-channel-reply-1.1.2.tar.gz
 # or POST /api/v4/plugins with the bundle as multipart form field "plugin"
 mmctl plugin enable com.github.mattermost-channel-reply
 ```
