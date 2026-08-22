@@ -4,6 +4,10 @@ import type {Store} from 'redux';
 import {getPostFromStore} from './openThread';
 import {getPostFromState} from '../utils/posts';
 
+const HIGHLIGHT_REPLY = 'HIGHLIGHT_REPLY';
+const CLEAR_HIGHLIGHT_REPLY = 'CLEAR_HIGHLIGHT_REPLY';
+const PERMALINK_FADEOUT_MS = 5000;
+
 type MattermostState = {
     entities: {
         general: {
@@ -19,7 +23,77 @@ type MattermostState = {
             teams: Record<string, {name: string}>;
         };
     };
+    views?: {
+        rhs?: {
+            selectedPostId?: string;
+            isSidebarOpen?: boolean;
+            highlightedPostId?: string;
+        };
+        rhsSuppressed?: boolean;
+    };
 };
+
+function isPostInThread(post: Post, threadRootId: string): boolean {
+    return post.id === threadRootId || post.root_id === threadRootId;
+}
+
+function isThreadRhsOpen(state: MattermostState): boolean {
+    return Boolean(
+        state.views?.rhs?.isSidebarOpen &&
+        !state.views?.rhsSuppressed &&
+        state.views?.rhs?.selectedPostId,
+    );
+}
+
+function getOpenThreadRootId(state: MattermostState): string | null {
+    return state.views?.rhs?.selectedPostId || null;
+}
+
+let highlightClearTimeout: number | undefined;
+
+function scheduleHighlightClear(store: Store): void {
+    if (highlightClearTimeout) {
+        window.clearTimeout(highlightClearTimeout);
+    }
+
+    highlightClearTimeout = window.setTimeout(() => {
+        store.dispatch({type: CLEAR_HIGHLIGHT_REPLY});
+        highlightClearTimeout = undefined;
+    }, PERMALINK_FADEOUT_MS);
+}
+
+function highlightPostInOpenThread(store: Store, postId: string): void {
+    const state = store.getState() as MattermostState;
+    const currentHighlight = state.views?.rhs?.highlightedPostId;
+
+    if (currentHighlight === postId) {
+        store.dispatch({type: CLEAR_HIGHLIGHT_REPLY});
+        window.requestAnimationFrame(() => {
+            store.dispatch({type: HIGHLIGHT_REPLY, postId});
+            scheduleHighlightClear(store);
+        });
+        return;
+    }
+
+    store.dispatch({type: HIGHLIGHT_REPLY, postId});
+    scheduleHighlightClear(store);
+}
+
+function tryNavigateWithinOpenThread(store: Store, post: Post): boolean {
+    const state = store.getState() as MattermostState;
+
+    if (!isThreadRhsOpen(state)) {
+        return false;
+    }
+
+    const threadRootId = getOpenThreadRootId(state);
+    if (!threadRootId || !isPostInThread(post, threadRootId)) {
+        return false;
+    }
+
+    highlightPostInOpenThread(store, post.id);
+    return true;
+}
 
 function getSiteUrl(store: Store): string {
     const state = store.getState() as MattermostState;
@@ -95,7 +169,14 @@ declare global {
 }
 
 export async function navigateToQuotedPost(store: Store, postId: string): Promise<boolean> {
-    await ensurePostLoaded(store, postId);
+    const post = await ensurePostLoaded(store, postId);
+    if (!post) {
+        return false;
+    }
+
+    if (tryNavigateWithinOpenThread(store, post)) {
+        return true;
+    }
 
     const permalinkPath = getPermalinkPath(store.getState(), postId);
     if (!permalinkPath) {
