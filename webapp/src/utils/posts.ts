@@ -29,10 +29,6 @@ export function getDisplayName(user?: UserProfile): string {
         return 'Unknown user';
     }
 
-    if (user.nickname) {
-        return user.nickname;
-    }
-
     const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
     if (fullName) {
         return fullName;
