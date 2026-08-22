@@ -11,7 +11,7 @@ export type PluginState = {
     pendingReply: PendingReply | null;
 };
 
-export const PLUGIN_STATE_KEY = 'plugins-com.github.mattermost-plugin-quoted-reply';
+export const PLUGIN_STATE_KEY = 'plugins-com.github.mattermost-channel-reply';
 
 export const SET_PENDING_REPLY = pluginAction('SET_PENDING_REPLY');
 export const CLEAR_PENDING_REPLY = pluginAction('CLEAR_PENDING_REPLY');

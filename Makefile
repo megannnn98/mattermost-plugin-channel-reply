@@ -1,4 +1,4 @@
-PLUGIN_ID := com.github.mattermost-plugin-quoted-reply
+PLUGIN_ID := com.github.mattermost-channel-reply
 PLUGIN_VERSION := 1.0.0
 BUNDLE_NAME := $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
 

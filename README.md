@@ -1,6 +1,16 @@
-# Mattermost Quoted Reply Plugin
+# Channel Reply — Mattermost Plugin
 
-A Mattermost webapp plugin that adds quoted replies: a **Reply** button on messages, a quote preview in the composer, and clickable quote blocks in sent messages.
+Reply to a specific message **in the channel stream** (with a quote block), or in a thread — without manual copy-paste quoting.
+
+## Screenshots
+
+**Reply button** on the message action bar:
+
+![Reply button on a message](images/reply-button.png)
+
+**Quoted reply in a thread** — the original message is shown as a clickable quote block above the reply:
+
+![Quoted reply with quote block in a thread](images/quoted-reply-thread.png)
 
 ## Features
 
@@ -24,7 +34,7 @@ make dist
 This installs webapp dependencies, builds `webapp/dist/main.js`, and creates:
 
 ```
-dist/com.github.mattermost-plugin-quoted-reply-1.0.0.tar.gz
+dist/com.github.mattermost-channel-reply-1.0.0.tar.gz
 ```
 
 Other commands:
@@ -41,21 +51,21 @@ make clean    # remove dist/ and node_modules/
 1. Open **System Console → Plugins → Plugin Management**
 2. Set **Enable Plugins** and **Enable Uploads** to `true`
 3. Click **Upload**, select the `.tar.gz` bundle from `dist/`
-4. Enable **Quoted Reply**
+4. Enable **Channel Reply**
 
 ### mmctl
 
 ```bash
-mmctl plugin upload dist/com.github.mattermost-plugin-quoted-reply-1.0.0.tar.gz
-mmctl plugin enable com.github.mattermost-plugin-quoted-reply
+mmctl plugin upload dist/com.github.mattermost-channel-reply-1.0.0.tar.gz
+mmctl plugin enable com.github.mattermost-channel-reply
 ```
 
 ### API
 
 ```bash
-mmctl plugin upload dist/com.github.mattermost-plugin-quoted-reply-1.0.0.tar.gz
+mmctl plugin upload dist/com.github.mattermost-channel-reply-1.0.0.tar.gz
 # or POST /api/v4/plugins with the bundle as multipart form field "plugin"
-mmctl plugin enable com.github.mattermost-plugin-quoted-reply
+mmctl plugin enable com.github.mattermost-channel-reply
 ```
 
 After installation, reload the Mattermost web client (hard refresh: **Ctrl+F5**).
@@ -76,7 +86,7 @@ If you publish your own fork, update the plugin ID in:
 - `webapp/src/types/store.ts` (`PLUGIN_STATE_KEY`)
 - `Makefile`
 
-Use a reverse-DNS ID you control, e.g. `com.example.mattermost-quoted-reply`.
+Use a reverse-DNS ID you control, e.g. `com.example.mattermost-channel-reply`.
 
 ## Project layout
 

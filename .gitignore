@@ -27,3 +27,6 @@ desktop.ini
 
 # Archives
 *.tar.gz
+
+# Local drafts and release prep (not for git)
+docs/_local/
