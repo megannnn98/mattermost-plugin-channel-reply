@@ -2,7 +2,7 @@
     "id": "com.github.mattermost-channel-reply",
     "name": "Channel Reply",
     "description": "Adds a Reply button to messages and renders quoted replies with clickable references in Mattermost.",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "min_server_version": "9.0.0",
     "webapp": {
         "bundle_path": "webapp/dist/main.js"

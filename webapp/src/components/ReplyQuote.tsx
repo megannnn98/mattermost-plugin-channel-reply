@@ -2,7 +2,7 @@ import React from 'react';
 
 import type {Post} from '@mattermost/types/posts';
 
-import {truncateMessage} from '../utils/posts';
+import {getQuotedPostDisplayMessage, truncateMessage} from '../utils/posts';
 
 type Props = {
     post: Post;
@@ -21,7 +21,7 @@ const ReplyQuote: React.FC<Props> = ({
     onNavigate,
     compact = false,
 }) => {
-    const message = truncateMessage(post.message || '');
+    const message = truncateMessage(getQuotedPostDisplayMessage(post));
     const isClickable = Boolean(permalink || onNavigate);
 
     const handleNavigate = (event: React.MouseEvent) => {

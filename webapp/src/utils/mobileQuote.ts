@@ -2,7 +2,7 @@ import type {Post} from '@mattermost/types/posts';
 import type {Store} from 'redux';
 
 import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from '../constants';
-import {getDisplayName, getPostFromState, getUserFromState, truncateMessage} from './posts';
+import {getDisplayName, getPostFromState, getUserFromState, getQuotedPostDisplayMessage, truncateMessage} from './posts';
 
 export function formatMobileQuoteBlock(authorName: string, quotedMessage: string): string {
     const author = authorName.trim() || 'Unknown user';
@@ -18,7 +18,7 @@ export function buildQuotedReplyPost(post: Post, replyToPostId: string, store: S
     const quotedPost = getPostFromState(state, replyToPostId);
     const quotedUser = quotedPost ? getUserFromState(state, quotedPost.user_id) : undefined;
     const mobileQuote = quotedPost
-        ? formatMobileQuoteBlock(getDisplayName(quotedUser), quotedPost.message || '')
+        ? formatMobileQuoteBlock(getDisplayName(quotedUser), getQuotedPostDisplayMessage(quotedPost))
         : '';
 
     return {

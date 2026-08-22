@@ -1,6 +1,8 @@
 import type {Post} from '@mattermost/types/posts';
 import type {UserProfile} from '@mattermost/types/users';
 
+import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE} from '../constants';
+
 type MattermostState = {
     entities: {
         posts: {
@@ -46,4 +48,36 @@ export function truncateMessage(message: string, maxLength = 500): string {
     }
 
     return `${normalized.slice(0, maxLength - 1)}…`;
+}
+
+function stripMobileQuotePrefix(message: string): string {
+    if (!message.startsWith('> ')) {
+        return message;
+    }
+
+    const separatorIndex = message.indexOf('\n\n');
+    if (separatorIndex === -1) {
+        return message;
+    }
+
+    const prefix = message.slice(0, separatorIndex);
+    if (!prefix.split('\n').every((line) => line.startsWith('> '))) {
+        return message;
+    }
+
+    return message.slice(separatorIndex + 2);
+}
+
+export function getQuotedPostDisplayMessage(post: Post): string {
+    const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
+    if (typeof bodyFromProps === 'string') {
+        return bodyFromProps;
+    }
+
+    const message = post.message || '';
+    if (post.type === QUOTED_REPLY_POST_TYPE) {
+        return stripMobileQuotePrefix(message);
+    }
+
+    return message;
 }
