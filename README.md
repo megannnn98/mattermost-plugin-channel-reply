@@ -2,6 +2,8 @@
 
 Reply to a specific message **in the channel stream** (with a quote block), or in a thread — without manual copy-paste quoting.
 
+> **Disclaimer:** This plugin was developed with the help of AI-assisted coding tools. It is provided as-is — use at your own discretion. Review the code before deploying to production, test in your environment, and keep in mind that behavior may differ across Mattermost versions and clients.
+
 ## Screenshots
 
 **Reply button** on the message action bar:
@@ -18,6 +20,12 @@ Reply to a specific message **in the channel stream** (with a quote block), or i
 - **Reply in thread** — reply from the thread sidebar or via **Thread** in the post menu; the answer stays in the thread.
 - **Clickable quotes** — clicking a quote block navigates to the original message using Mattermost permalinks (scroll + highlight).
 - **Quote UI** — quote bar, compact preview above the composer, up to 5 lines of quoted text.
+
+## Mobile app
+
+The plugin UI (Reply button, quote block, composer preview) runs only in the **web and desktop** clients.
+
+Quoted replies **can be read** in the native mobile app: the post message includes a markdown blockquote with the author name and quoted text. Creating quoted replies from the mobile app is not supported.
 
 ## Requirements
 

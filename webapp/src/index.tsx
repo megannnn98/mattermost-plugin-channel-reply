@@ -10,7 +10,8 @@ import ReplyButton from './components/ReplyButton';
 import ReplyComposerPreview from './components/ReplyComposerPreview';
 import QuotedReplyPost from './components/QuotedReplyPost';
 import QuotedReplyStyles from './components/QuotedReplyStyles';
-import {QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from './constants';
+import {QUOTED_REPLY_POST_TYPE} from './constants';
+import {buildQuotedReplyPost} from './utils/mobileQuote';
 import {getTranslationsForLocale} from './i18n';
 import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/reply';
 import {getPostFromStore, isReplyablePost} from './actions/openThread';
@@ -76,14 +77,7 @@ export default class Plugin {
             clearPendingReply(store);
 
             return {
-                post: {
-                    ...post,
-                    type: QUOTED_REPLY_POST_TYPE,
-                    props: {
-                        ...post.props,
-                        [QUOTED_REPLY_PROP]: pendingReply.replyToPostId,
-                    },
-                },
+                post: buildQuotedReplyPost(post, pendingReply.replyToPostId, store),
             };
         });
     }

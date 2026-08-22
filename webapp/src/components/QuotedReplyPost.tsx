@@ -5,7 +5,7 @@ import type {Post} from '@mattermost/types/posts';
 import type {GlobalState} from '@mattermost/types/store';
 
 import {getPermalinkUrl, navigateToQuotedPost} from '../actions/navigateToPost';
-import {QUOTED_REPLY_PROP} from '../constants';
+import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_PROP} from '../constants';
 import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
 import ReplyQuote from './ReplyQuote';
 
@@ -55,7 +55,8 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
         void navigateToQuotedPost(store, replyToPostId);
     }, [replyToPostId, store]);
 
-    const formattedText = window.PostUtils.formatText(post.message || '');
+    const replyBody = (post.props?.[QUOTED_REPLY_BODY_PROP] as string | undefined) ?? post.message ?? '';
+    const formattedText = window.PostUtils.formatText(replyBody);
 
     return (
         <div className='quoted-reply-post'>
