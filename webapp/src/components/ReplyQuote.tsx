@@ -106,6 +106,7 @@ const ReplyQuote: React.FC<Props> = ({
                 aria-hidden='true'
             />
             <ReplyQuoteAvatar
+                key={user?.id}
                 user={user}
                 username={username}
                 compact={compact}
