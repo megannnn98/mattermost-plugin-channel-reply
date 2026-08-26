@@ -109,7 +109,7 @@ export function getQuotedReplyBody(post: Post): string {
         }
 
         const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
-        if (typeof bodyFromProps === 'string' && message.endsWith(bodyFromProps)) {
+        if (typeof bodyFromProps === 'string' && bodyFromProps && message.endsWith(bodyFromProps)) {
             return bodyFromProps;
         }
     }
