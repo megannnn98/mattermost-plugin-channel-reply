@@ -4,7 +4,7 @@ import {useSelector, useStore} from 'react-redux';
 import type {Post} from '@mattermost/types/posts';
 import type {GlobalState} from '@mattermost/types/store';
 
-import {getPermalinkUrl, navigateToQuotedPost} from '../actions/navigateToPost';
+import {getPermalinkPath, getSiteUrl, navigateToQuotedPost} from '../actions/navigateToPost';
 import {QUOTED_REPLY_PROP} from '../constants';
 import {getPostFromState, getUserFromState, getDisplayName, getQuotedReplyBody} from '../utils/posts';
 import ReplyQuote from './ReplyQuote';
@@ -45,12 +45,13 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
         return getUserFromState(state, replyPost.user_id);
     });
 
-    const permalink = useMemo(() => {
+    const permalinkPath = useSelector((state: GlobalState) => {
         if (!replyToPostId) {
             return null;
         }
-        return getPermalinkUrl(store, replyToPostId);
-    }, [replyToPostId, store]);
+        return getPermalinkPath(state, replyToPostId);
+    });
+    const permalink = permalinkPath ? `${getSiteUrl(store).replace(/\/$/, '')}${permalinkPath}` : null;
 
     const handleQuoteClick = useCallback(() => {
         if (!replyToPostId) {
@@ -81,7 +82,7 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
             {replyPost && (
                 <ReplyQuote
                     post={replyPost}
-                    username={getDisplayName(replyUser)}
+                    username={getDisplayName(replyUser) || 'Unknown user'}
                     user={replyUser}
                     permalink={permalink}
                     onNavigate={handleQuoteClick}

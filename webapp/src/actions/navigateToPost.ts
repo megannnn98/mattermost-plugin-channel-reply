@@ -57,16 +57,22 @@ export function isPostInOpenThread(state: unknown, post: Post): boolean {
 }
 
 let highlightClearTimeout: number | undefined;
+let highlightClearPostId: string | undefined;
 
-function scheduleHighlightClear(store: Store): void {
+function scheduleHighlightClear(store: Store, postId: string): void {
     if (highlightClearTimeout) {
         window.clearTimeout(highlightClearTimeout);
     }
 
     highlightClearTimeout = window.setTimeout(() => {
-        store.dispatch({type: CLEAR_HIGHLIGHT_REPLY});
+        const state = store.getState() as MattermostState;
+        if (state.views?.rhs?.highlightedPostId === highlightClearPostId) {
+            store.dispatch({type: CLEAR_HIGHLIGHT_REPLY});
+        }
         highlightClearTimeout = undefined;
+        highlightClearPostId = undefined;
     }, PERMALINK_FADEOUT_MS);
+    highlightClearPostId = postId;
 }
 
 function highlightPostInOpenThread(store: Store, postId: string): void {
@@ -77,13 +83,13 @@ function highlightPostInOpenThread(store: Store, postId: string): void {
         store.dispatch({type: CLEAR_HIGHLIGHT_REPLY});
         window.requestAnimationFrame(() => {
             store.dispatch({type: HIGHLIGHT_REPLY, postId});
-            scheduleHighlightClear(store);
+            scheduleHighlightClear(store, postId);
         });
         return;
     }
 
     store.dispatch({type: HIGHLIGHT_REPLY, postId});
-    scheduleHighlightClear(store);
+    scheduleHighlightClear(store, postId);
 }
 
 function tryNavigateWithinOpenThread(store: Store, post: Post): boolean {

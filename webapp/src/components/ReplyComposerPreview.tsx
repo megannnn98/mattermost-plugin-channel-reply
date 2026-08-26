@@ -97,7 +97,7 @@ const ReplyComposerPreview: React.FC = () => {
         <div className='quoted-reply-composer-preview'>
             <ReplyQuote
                 post={replyPost}
-                username={getDisplayName(replyUser)}
+                username={getDisplayName(replyUser) || 'Unknown user'}
                 user={replyUser}
                 onClose={() => clearPendingReply(store)}
             />

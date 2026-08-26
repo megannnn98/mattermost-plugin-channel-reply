@@ -24,9 +24,9 @@ export function getUserFromState(state: unknown, userId: string): UserProfile | 
     return mattermostState.entities?.users?.profiles?.[userId];
 }
 
-export function getDisplayName(user?: UserProfile): string {
+export function getDisplayName(user?: UserProfile): string | undefined {
     if (!user) {
-        return 'Unknown user';
+        return undefined;
     }
 
     const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
@@ -55,16 +55,16 @@ export function getUserAvatarFallbackUrl(user: UserProfile | undefined, siteUrl:
 
 export function getUserInitials(user?: UserProfile): string {
     const displayName = getDisplayName(user);
-    if (displayName === 'Unknown user') {
+    if (!displayName) {
         return '?';
     }
 
     const parts = displayName.trim().split(/\s+/).filter(Boolean);
     if (parts.length >= 2) {
-        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+        return `${Array.from(parts[0])[0]}${Array.from(parts[1])[0]}`.toUpperCase();
     }
 
-    return displayName.slice(0, 2).toUpperCase();
+    return Array.from(displayName).slice(0, 2).join('').toUpperCase();
 }
 
 export function truncateMessage(message: string, maxLength = 500): string {

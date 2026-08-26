@@ -34,7 +34,7 @@ export function getPostFromStore(store: Store, postId: string): Post | undefined
 }
 
 async function apiGet<T>(store: Store, path: string): Promise<T> {
-    const response = await fetch(`${getSiteUrl(store)}/api/v4${path}`, {
+    const response = await fetch(`${getSiteUrl(store).replace(/\/$/, '')}/api/v4${path}`, {
         credentials: 'same-origin',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
