@@ -21,6 +21,8 @@ const ReplyComposerPreview: React.FC = () => {
         } | null;
     });
 
+    const currentChannelId = useSelector((state: GlobalState) => state.entities.channels.currentChannelId);
+
     const replyPost = useSelector((state: GlobalState) => {
         if (!pendingReply) {
             return undefined;
@@ -38,6 +40,12 @@ const ReplyComposerPreview: React.FC = () => {
     const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
 
     useEffect(() => {
+        if (pendingReply && currentChannelId !== pendingReply.channelId) {
+            clearPendingReply(store);
+        }
+    }, [currentChannelId, pendingReply, store]);
+
+    useEffect(() => {
         if (!pendingReply) {
             setPortalHost(null);
             return undefined;
@@ -45,14 +53,19 @@ const ReplyComposerPreview: React.FC = () => {
 
         let hostElement: HTMLDivElement | null = null;
 
+        const mountTargetSelector = pendingReply.context === 'thread' ?
+            '.sidebar--right .AdvancedTextEditor__cell' :
+            '#post-create .AdvancedTextEditor__cell';
+        let warnedMissingMountTarget = false;
+
         const mountPreview = () => {
-            const mountTarget = (
-                pendingReply.context === 'thread' ?
-                    document.querySelector('.sidebar--right .AdvancedTextEditor__cell') :
-                    document.querySelector('#post-create .AdvancedTextEditor__cell')
-            ) as HTMLElement | null;
+            const mountTarget = document.querySelector(mountTargetSelector) as HTMLElement | null;
 
             if (!mountTarget) {
+                if (!warnedMissingMountTarget) {
+                    console.warn(`Quoted reply preview mount target not found: ${mountTargetSelector}`);
+                    warnedMissingMountTarget = true;
+                }
                 return;
             }
 
@@ -66,12 +79,11 @@ const ReplyComposerPreview: React.FC = () => {
         };
 
         mountPreview();
-        const intervalId = window.setInterval(mountPreview, 150);
-        const timeoutId = window.setTimeout(() => window.clearInterval(intervalId), 3000);
+        const observer = new MutationObserver(mountPreview);
+        observer.observe(document.body, {childList: true, subtree: true});
 
         return () => {
-            window.clearInterval(intervalId);
-            window.clearTimeout(timeoutId);
+            observer.disconnect();
             hostElement?.remove();
             setPortalHost(null);
         };

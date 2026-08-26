@@ -108,7 +108,7 @@ export function getQuotedReplyBody(post: Post): string {
         }
 
         const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
-        if (typeof bodyFromProps === 'string') {
+        if (typeof bodyFromProps === 'string' && message.endsWith(bodyFromProps)) {
             return bodyFromProps;
         }
     }

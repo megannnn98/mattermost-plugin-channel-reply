@@ -63,14 +63,17 @@ export default class Plugin {
             }
 
             if (post.channel_id !== pendingReply.channelId) {
+                clearPendingReply(store);
                 return {post};
             }
 
             if (pendingReply.context === 'channel') {
                 if (post.root_id) {
+                    clearPendingReply(store);
                     return {post};
                 }
             } else if ((post.root_id || '') !== pendingReply.rootId) {
+                clearPendingReply(store);
                 return {post};
             }
 
