@@ -9,6 +9,9 @@ import {PLUGIN_STATE_KEY} from '../types/store';
 import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
 import ReplyQuote from './ReplyQuote';
 
+const PREVIEW_MOUNT_TIMEOUT_MS = 3000;
+const MAX_PREVIEW_REMOUNTS = 20;
+
 const ReplyComposerPreview: React.FC = () => {
     const store = useStore();
     const pendingReply = useSelector((state: GlobalState) => {
@@ -57,6 +60,9 @@ const ReplyComposerPreview: React.FC = () => {
             '.sidebar--right .AdvancedTextEditor__cell' :
             '#post-create .AdvancedTextEditor__cell';
         let warnedMissingMountTarget = false;
+        let remounts = 0;
+        let observer: MutationObserver | null = null;
+        let mountTimeout: number | undefined;
 
         const mountPreview = () => {
             const mountTarget = document.querySelector(mountTargetSelector) as HTMLElement | null;
@@ -70,20 +76,40 @@ const ReplyComposerPreview: React.FC = () => {
             }
 
             if (!hostElement || hostElement.parentElement !== mountTarget) {
+                if (hostElement && ++remounts > MAX_PREVIEW_REMOUNTS) {
+                    console.warn('Quoted reply preview host keeps being detached; giving up');
+                    observer?.disconnect();
+                    clearPendingReply(store);
+                    return;
+                }
+
                 hostElement?.remove();
                 hostElement = document.createElement('div');
                 hostElement.className = 'quoted-reply-composer-host';
                 mountTarget.insertBefore(hostElement, mountTarget.firstChild);
+                if (mountTimeout !== undefined) {
+                    window.clearTimeout(mountTimeout);
+                    mountTimeout = undefined;
+                }
                 setPortalHost(hostElement);
             }
         };
 
+        mountTimeout = window.setTimeout(() => {
+            if (!hostElement?.isConnected) {
+                console.warn(`Quoted reply preview host did not appear: ${mountTargetSelector}`);
+                clearPendingReply(store);
+            }
+        }, PREVIEW_MOUNT_TIMEOUT_MS);
         mountPreview();
-        const observer = new MutationObserver(mountPreview);
+        observer = new MutationObserver(mountPreview);
         observer.observe(document.body, {childList: true, subtree: true});
 
         return () => {
             observer.disconnect();
+            if (mountTimeout !== undefined) {
+                window.clearTimeout(mountTimeout);
+            }
             hostElement?.remove();
             setPortalHost(null);
         };
