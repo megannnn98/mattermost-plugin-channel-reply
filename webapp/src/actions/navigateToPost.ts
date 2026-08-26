@@ -136,15 +136,6 @@ export function getPermalinkPath(state: unknown, postId: string): string | null 
     return `/${teamName}/pl/${postId}`;
 }
 
-export function getPermalinkUrl(store: Store, postId: string): string | null {
-    const path = getPermalinkPath(store.getState(), postId);
-    if (!path) {
-        return null;
-    }
-
-    return `${getSiteUrl(store).replace(/\/$/, '')}${path}`;
-}
-
 async function ensurePostLoaded(store: Store, postId: string): Promise<Post | undefined> {
     let post = getPostFromStore(store, postId) || getPostFromState(store.getState(), postId);
     if (post) {

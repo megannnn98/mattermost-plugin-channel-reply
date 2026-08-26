@@ -1,4 +1,5 @@
 import React from 'react';
+import {useSelector} from 'react-redux';
 import type {Store} from 'redux';
 
 import type {GlobalState} from '@mattermost/types/store';
@@ -32,6 +33,15 @@ type PluginRegistry = {
     registerTranslations: (getTranslationsForLocale: (locale: string) => Record<string, string>) => void;
 };
 
+const ThreadMenuLabel: React.FC = () => {
+    const locale = useSelector((state: GlobalState) => {
+        const {currentUserId, profiles} = state.entities.users;
+        return profiles[currentUserId]?.locale || 'en';
+    });
+
+    return <>{getThreadLabel(locale)}</>;
+};
+
 export default class Plugin {
     public initialize(registry: PluginRegistry, store: Store<GlobalState>): void {
         registry.registerReducer(reducer);
@@ -42,9 +52,7 @@ export default class Plugin {
         registry.registerPostTypeComponent(QUOTED_REPLY_POST_TYPE, QuotedReplyPost);
 
         registry.registerPostDropdownMenuAction(
-            getThreadLabel(
-                store.getState().entities.users.profiles[store.getState().entities.users.currentUserId]?.locale || 'en',
-            ),
+            <ThreadMenuLabel/>,
             (postId: string) => {
                 const post = getPostFromStore(store, postId);
                 if (post) {

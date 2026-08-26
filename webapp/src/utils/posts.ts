@@ -1,7 +1,7 @@
 import type {Post} from '@mattermost/types/posts';
 import type {UserProfile} from '@mattermost/types/users';
 
-import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from '../constants';
+import {QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from '../constants';
 
 type MattermostState = {
     entities: {
@@ -108,10 +108,6 @@ export function getQuotedReplyBody(post: Post): string {
             return stripped;
         }
 
-        const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
-        if (typeof bodyFromProps === 'string' && bodyFromProps && message.endsWith(bodyFromProps)) {
-            return bodyFromProps;
-        }
     }
 
     return message;

@@ -63,15 +63,15 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
 
     const replyBody = getQuotedReplyBody(post);
     const formattedBody = useMemo(() => {
-        const formatOptions: PostFormatOptions = {
-            postId: post.id,
-            editedAt: post.edit_at || 0,
-        };
         if (!window.PostUtils) {
             console.warn('Quoted reply PostUtils global not found; rendering reply body as plain text');
             return replyBody;
         }
 
+        const formatOptions: PostFormatOptions = {
+            postId: post.id,
+            editedAt: post.edit_at || 0,
+        };
         const formattedText = window.PostUtils.formatText(replyBody, formatOptions);
 
         return window.PostUtils.messageHtmlToComponent(formattedText, false, formatOptions);
