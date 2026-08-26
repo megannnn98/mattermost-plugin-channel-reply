@@ -45,4 +45,13 @@ describe('quoted-post navigation', () => {
         (global.fetch as jest.Mock).mockResolvedValue({ok: false});
         await expect(navigateToQuotedPost({getState: () => ({...outside, entities: {...outside.entities, posts: {posts: {}}}}), dispatch: jest.fn()} as never, 'missing')).resolves.toBe(false);
     });
+
+    it('normalizes a trailing slash when loading a missing post', async () => {
+        const unloaded = {...state, entities: {...state.entities, posts: {posts: {}}}, views: {rhs: {isSidebarOpen: false}}};
+        (global.fetch as jest.Mock).mockResolvedValue({ok: true, json: async () => post});
+        window.WebappUtils = {browserHistory: {push: jest.fn()}};
+
+        await expect(navigateToQuotedPost({getState: () => unloaded, dispatch: jest.fn()} as never, 'post')).resolves.toBe(false);
+        expect(global.fetch).toHaveBeenCalledWith('https://mm/sub/api/v4/posts/post', expect.any(Object));
+    });
 });

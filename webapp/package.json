@@ -1,7 +1,7 @@
 {
     "private": true,
     "scripts": {
-        "check": "tsc --noEmit",
+        "check": "tsc --noEmit && jest",
         "build": "webpack --mode=production",
         "debug": "webpack --mode=development",
         "test": "jest",

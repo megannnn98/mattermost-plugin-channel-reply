@@ -2,7 +2,7 @@ PLUGIN_ID := com.github.mattermost-channel-reply
 PLUGIN_VERSION := 1.1.3
 BUNDLE_NAME := $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
 
-.PHONY: all webapp bundle dist clean
+.PHONY: all webapp bundle dist clean test
 
 all: dist
 
@@ -10,6 +10,9 @@ webapp:
 	cd webapp && npm install
 	cd webapp && npm run check
 	cd webapp && npm run build
+
+test:
+	cd webapp && npm test
 
 bundle:
 	rm -rf dist/$(PLUGIN_ID)

@@ -95,9 +95,23 @@ export async function startReplyToPost(
     setPendingReply(store, pendingReply);
 
     if (context === 'thread') {
-        const opened = await openThreadForPost(store, post.id);
+        let opened = false;
+        try {
+            opened = await openThreadForPost(store, post.id);
+        } catch (error) {
+            console.error(
+                `Quoted reply failed to open thread for post ${post.id}:`,
+                error instanceof Error ? error.message : String(error),
+            );
+        }
+
+        if (!opened) {
+            clearPendingReply(store);
+            return false;
+        }
+
         focusComposer('thread');
-        return opened;
+        return true;
     }
 
     closeRhs(store);

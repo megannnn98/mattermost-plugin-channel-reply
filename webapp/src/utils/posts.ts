@@ -1,7 +1,7 @@
 import type {Post} from '@mattermost/types/posts';
 import type {UserProfile} from '@mattermost/types/users';
 
-import {QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from '../constants';
+import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from '../constants';
 
 type MattermostState = {
     entities: {
@@ -76,20 +76,20 @@ export function truncateMessage(message: string, maxLength = 500): string {
     return `${normalized.slice(0, maxLength - 1)}…`;
 }
 
-function stripMobileQuotePrefix(message: string): string {
+function stripMobileQuotePrefix(message: string): string | null {
     if (!message.startsWith('> ')) {
-        return message;
+        return null;
     }
 
     const separatorIndex = message.indexOf('\n\n');
     if (separatorIndex === -1) {
-        return message;
+        return null;
     }
 
     const prefix = message.slice(0, separatorIndex);
     const lines = prefix.split('\n');
     if (!/^> \*\*.+\*\*$/.test(lines[0]) || !lines.every((line) => line.startsWith('> '))) {
-        return message;
+        return null;
     }
 
     return message.slice(separatorIndex + 2);
@@ -102,14 +102,17 @@ function isQuotedReplyPost(post: Post): boolean {
 export function getQuotedReplyBody(post: Post): string {
     const message = post.message || '';
 
-    if (isQuotedReplyPost(post)) {
-        const stripped = stripMobileQuotePrefix(message);
-        if (stripped) {
-            return stripped;
-        }
+    if (!isQuotedReplyPost(post)) {
+        return message;
     }
 
-    return message;
+    const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
+    if (typeof bodyFromProps === 'string' && message.endsWith(bodyFromProps)) {
+        return bodyFromProps;
+    }
+
+    const stripped = stripMobileQuotePrefix(message);
+    return stripped === null ? message : stripped;
 }
 
 export function getQuotedPostDisplayMessage(post: Post): string {

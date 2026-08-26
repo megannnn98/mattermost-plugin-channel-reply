@@ -142,7 +142,7 @@ async function ensurePostLoaded(store: Store, postId: string): Promise<Post | un
         return post;
     }
 
-    const response = await fetch(`${getSiteUrl(store)}/api/v4/posts/${postId}`, {
+    const response = await fetch(`${getSiteUrl(store).replace(/\/$/, '')}/api/v4/posts/${postId}`, {
         credentials: 'same-origin',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
