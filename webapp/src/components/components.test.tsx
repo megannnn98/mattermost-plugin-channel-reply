@@ -42,6 +42,16 @@ describe('display components', () => {
         expect(screen.getByText('AL')).toBeInTheDocument();
     });
 
+    it('cancels a reply quote', () => {
+        const onClose = jest.fn();
+        renderWithStore(<ReplyQuote post={post} username='Alice' onClose={onClose}/>, {
+            entities: {general: {config: {SiteURL: 'https://mm'}}},
+        });
+
+        fireEvent.click(screen.getByRole('button', {name: 'Cancel reply'}));
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
     it('renders reply action only for replyable posts', () => {
         const state = {entities: {general: {config: {SiteURL: ''}}, channels: {}, teams: {}}, views: {rhs: {isSidebarOpen: true, selectedPostId: 'post'}}};
         const container = document.createElement('div');
