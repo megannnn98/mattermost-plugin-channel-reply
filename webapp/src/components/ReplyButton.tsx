@@ -39,7 +39,10 @@ const ReplyButton: React.FC<Props> = ({post}) => {
         event.preventDefault();
         event.stopPropagation();
 
-        const context = isInOpenThread || isReplyInThreadView(event.currentTarget as HTMLElement) ? 'thread' : 'channel';
+        const element = event.currentTarget as HTMLElement;
+        const inThreadView = isReplyInThreadView(element);
+        const inCenterChannel = Boolean(element.closest('#post-list, .post-list__table, #channel-view'));
+        const context = inThreadView ? 'thread' : inCenterChannel ? 'channel' : isInOpenThread ? 'thread' : 'channel';
         void startReplyToPost(store, post, {context});
     };
 
