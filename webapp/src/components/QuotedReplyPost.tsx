@@ -16,7 +16,7 @@ type PostFormatOptions = {
 
 declare global {
     interface Window {
-        PostUtils: {
+        PostUtils?: {
             formatText: (message: string, options?: PostFormatOptions) => string;
             messageHtmlToComponent: (html: string, isRHS?: boolean, options?: PostFormatOptions) => React.ReactNode;
         };
@@ -66,6 +66,11 @@ const QuotedReplyPost: React.FC<Props> = ({post}) => {
             postId: post.id,
             editedAt: post.edit_at || 0,
         };
+        if (!window.PostUtils) {
+            console.warn('Quoted reply PostUtils global not found; rendering reply body as plain text');
+            return replyBody;
+        }
+
         const formattedText = window.PostUtils.formatText(replyBody, formatOptions);
 
         return window.PostUtils.messageHtmlToComponent(formattedText, false, formatOptions);

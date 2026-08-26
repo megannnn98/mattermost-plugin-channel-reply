@@ -31,15 +31,26 @@ function focusComposer(context: ReplyContext): void {
         'textarea#post_textbox',
     ];
 
-    window.setTimeout(() => {
+    let attempts = 0;
+    const tryFocus = () => {
         for (const selector of selectors) {
             const element = document.querySelector(selector) as HTMLElement | null;
             if (element) {
                 element.focus();
-                break;
+                return;
             }
         }
-    }, 250);
+
+        attempts += 1;
+        if (attempts < 10) {
+            window.setTimeout(tryFocus, 100);
+            return;
+        }
+
+        console.warn(`Quoted reply composer not found: ${selectors.join(', ')}`);
+    };
+
+    tryFocus();
 }
 
 export function setPendingReply(store: Store, pendingReply: PendingReply | null): void {
