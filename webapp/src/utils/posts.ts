@@ -107,7 +107,6 @@ export function getQuotedReplyBody(post: Post): string {
         if (stripped) {
             return stripped;
         }
-
     }
 
     return message;

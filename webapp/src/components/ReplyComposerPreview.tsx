@@ -9,7 +9,7 @@ import {PLUGIN_STATE_KEY} from '../types/store';
 import {getPostFromState, getUserFromState, getDisplayName} from '../utils/posts';
 import ReplyQuote from './ReplyQuote';
 
-const PREVIEW_MOUNT_TIMEOUT_MS = 3000;
+const PREVIEW_MOUNT_TIMEOUT_MS = 10000;
 const MAX_PREVIEW_REMOUNTS = 20;
 
 const ReplyComposerPreview: React.FC = () => {
