@@ -8,6 +8,7 @@ all: dist
 
 webapp:
 	cd webapp && npm install
+	cd webapp && npm run check
 	cd webapp && npm run build
 
 bundle:

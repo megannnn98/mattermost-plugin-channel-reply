@@ -17,7 +17,7 @@ import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/re
 import {getPostFromStore, isReplyablePost} from './actions/openThread';
 
 type PluginRegistry = {
-    registerReducer: (reducer: typeof reducer) => void;
+    registerReducer: (pluginReducer: typeof reducer) => void;
     registerPostActionComponent: (component: React.ComponentType<{post: Post}>) => string;
     registerPostDropdownMenuAction: (
         text: React.ReactNode,

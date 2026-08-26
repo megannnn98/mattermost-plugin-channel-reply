@@ -23,7 +23,7 @@ export function buildQuotedReplyPost(post: Post, replyToPostId: string, store: S
 
     return {
         ...post,
-        type: QUOTED_REPLY_POST_TYPE,
+        type: QUOTED_REPLY_POST_TYPE as Post['type'],
         message: mobileQuote ? `${mobileQuote}\n\n${replyBody}` : replyBody,
         props: {
             ...post.props,

@@ -12,7 +12,7 @@ import ReplyQuote from './ReplyQuote';
 const ReplyComposerPreview: React.FC = () => {
     const store = useStore();
     const pendingReply = useSelector((state: GlobalState) => {
-        const pluginState = (state as Record<string, {pendingReply: unknown}>)[PLUGIN_STATE_KEY];
+        const pluginState = (state as unknown as Record<string, {pendingReply: unknown}>)[PLUGIN_STATE_KEY];
         return pluginState?.pendingReply as {
             replyToPostId: string;
             channelId: string;
