@@ -33,11 +33,11 @@ type MattermostState = {
     };
 };
 
-function isPostInThread(post: Post, threadRootId: string): boolean {
+export function isPostInThread(post: Post, threadRootId: string): boolean {
     return post.id === threadRootId || post.root_id === threadRootId;
 }
 
-function isThreadRhsOpen(state: MattermostState): boolean {
+export function isThreadRhsOpen(state: MattermostState): boolean {
     return Boolean(
         state.views?.rhs?.isSidebarOpen &&
         !state.views?.rhsSuppressed &&
@@ -47,6 +47,13 @@ function isThreadRhsOpen(state: MattermostState): boolean {
 
 function getOpenThreadRootId(state: MattermostState): string | null {
     return state.views?.rhs?.selectedPostId || null;
+}
+
+export function isPostInOpenThread(state: unknown, post: Post): boolean {
+    const mattermostState = state as MattermostState;
+    const threadRootId = getOpenThreadRootId(mattermostState);
+
+    return Boolean(threadRootId && isThreadRhsOpen(mattermostState) && isPostInThread(post, threadRootId));
 }
 
 let highlightClearTimeout: number | undefined;
