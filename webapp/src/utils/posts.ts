@@ -24,9 +24,9 @@ export function getUserFromState(state: unknown, userId: string): UserProfile | 
     return mattermostState.entities?.users?.profiles?.[userId];
 }
 
-export function getDisplayName(user?: UserProfile): string {
+export function getDisplayName(user?: UserProfile): string | undefined {
     if (!user) {
-        return 'Unknown user';
+        return undefined;
     }
 
     const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
@@ -37,34 +37,34 @@ export function getDisplayName(user?: UserProfile): string {
     return user.username;
 }
 
-export function getUserAvatarUrl(user?: UserProfile): string | null {
+export function getUserAvatarUrl(user: UserProfile | undefined, siteUrl: string): string | null {
     if (!user?.id) {
         return null;
     }
 
-    return `/api/v4/users/${user.id}/image?_=${user.last_picture_update || 0}`;
+    return `${siteUrl.replace(/\/$/, '')}/api/v4/users/${user.id}/image?_=${user.last_picture_update || 0}`;
 }
 
-export function getUserAvatarFallbackUrl(user?: UserProfile): string | null {
+export function getUserAvatarFallbackUrl(user: UserProfile | undefined, siteUrl: string): string | null {
     if (!user?.id) {
         return null;
     }
 
-    return `/api/v4/users/${user.id}/image/default`;
+    return `${siteUrl.replace(/\/$/, '')}/api/v4/users/${user.id}/image/default`;
 }
 
 export function getUserInitials(user?: UserProfile): string {
     const displayName = getDisplayName(user);
-    if (displayName === 'Unknown user') {
+    if (!displayName) {
         return '?';
     }
 
     const parts = displayName.trim().split(/\s+/).filter(Boolean);
     if (parts.length >= 2) {
-        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+        return `${Array.from(parts[0])[0]}${Array.from(parts[1])[0]}`.toUpperCase();
     }
 
-    return displayName.slice(0, 2).toUpperCase();
+    return Array.from(displayName).slice(0, 2).join('').toUpperCase();
 }
 
 export function truncateMessage(message: string, maxLength = 500): string {
@@ -76,19 +76,20 @@ export function truncateMessage(message: string, maxLength = 500): string {
     return `${normalized.slice(0, maxLength - 1)}…`;
 }
 
-function stripMobileQuotePrefix(message: string): string {
+function stripMobileQuotePrefix(message: string): string | null {
     if (!message.startsWith('> ')) {
-        return message;
+        return null;
     }
 
     const separatorIndex = message.indexOf('\n\n');
     if (separatorIndex === -1) {
-        return message;
+        return null;
     }
 
     const prefix = message.slice(0, separatorIndex);
-    if (!prefix.split('\n').every((line) => line.startsWith('> '))) {
-        return message;
+    const lines = prefix.split('\n');
+    if (!/^> \*\*.+\*\*$/.test(lines[0]) || !lines.every((line) => line.startsWith('> '))) {
+        return null;
     }
 
     return message.slice(separatorIndex + 2);
@@ -101,19 +102,17 @@ function isQuotedReplyPost(post: Post): boolean {
 export function getQuotedReplyBody(post: Post): string {
     const message = post.message || '';
 
-    if (isQuotedReplyPost(post)) {
-        const stripped = stripMobileQuotePrefix(message);
-        if (stripped) {
-            return stripped;
-        }
-
-        const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
-        if (typeof bodyFromProps === 'string') {
-            return bodyFromProps;
-        }
+    if (!isQuotedReplyPost(post)) {
+        return message;
     }
 
-    return message;
+    const bodyFromProps = post.props?.[QUOTED_REPLY_BODY_PROP];
+    if (typeof bodyFromProps === 'string' && message.endsWith(bodyFromProps)) {
+        return bodyFromProps;
+    }
+
+    const stripped = stripMobileQuotePrefix(message);
+    return stripped === null ? message : stripped;
 }
 
 export function getQuotedPostDisplayMessage(post: Post): string {

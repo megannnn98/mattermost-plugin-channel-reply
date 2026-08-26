@@ -1,8 +1,10 @@
 import React from 'react';
-import {useStore} from 'react-redux';
+import {useSelector, useStore} from 'react-redux';
 
 import type {Post} from '@mattermost/types/posts';
+import type {GlobalState} from '@mattermost/types/store';
 
+import {isPostInOpenThread} from '../actions/navigateToPost';
 import {startReplyToPost, isReplyInThreadView} from '../actions/reply';
 import {isReplyablePost} from '../actions/openThread';
 
@@ -27,6 +29,7 @@ const ReplyIcon = () => (
 
 const ReplyButton: React.FC<Props> = ({post}) => {
     const store = useStore();
+    const isInOpenThread = useSelector((state: GlobalState) => isPostInOpenThread(state, post));
 
     if (!isReplyablePost(post)) {
         return null;
@@ -36,7 +39,10 @@ const ReplyButton: React.FC<Props> = ({post}) => {
         event.preventDefault();
         event.stopPropagation();
 
-        const context = isReplyInThreadView(event.currentTarget as HTMLElement) ? 'thread' : 'channel';
+        const element = event.currentTarget as HTMLElement;
+        const inThreadView = isReplyInThreadView(element);
+        const inCenterChannel = Boolean(element.closest('#post-list, .post-list__table, #channel-view'));
+        const context = inThreadView ? 'thread' : inCenterChannel ? 'channel' : isInOpenThread ? 'thread' : 'channel';
         void startReplyToPost(store, post, {context});
     };
 

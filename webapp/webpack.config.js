@@ -45,5 +45,5 @@ module.exports = {
         publicPath: '/',
         filename: 'main.js',
     },
-    mode: 'production',
+    devtool: process.argv.includes('--mode=development') ? 'source-map' : false,
 };

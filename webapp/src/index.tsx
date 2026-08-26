@@ -1,4 +1,5 @@
 import React from 'react';
+import {useSelector} from 'react-redux';
 import type {Store} from 'redux';
 
 import type {GlobalState} from '@mattermost/types/store';
@@ -12,12 +13,12 @@ import QuotedReplyPost from './components/QuotedReplyPost';
 import QuotedReplyStyles from './components/QuotedReplyStyles';
 import {QUOTED_REPLY_POST_TYPE} from './constants';
 import {buildQuotedReplyPost} from './utils/mobileQuote';
-import {getTranslationsForLocale} from './i18n';
+import {getThreadLabel, getTranslationsForLocale} from './i18n';
 import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/reply';
 import {getPostFromStore, isReplyablePost} from './actions/openThread';
 
 type PluginRegistry = {
-    registerReducer: (reducer: typeof reducer) => void;
+    registerReducer: (pluginReducer: typeof reducer) => void;
     registerPostActionComponent: (component: React.ComponentType<{post: Post}>) => string;
     registerPostDropdownMenuAction: (
         text: React.ReactNode,
@@ -32,6 +33,15 @@ type PluginRegistry = {
     registerTranslations: (getTranslationsForLocale: (locale: string) => Record<string, string>) => void;
 };
 
+const ThreadMenuLabel: React.FC = () => {
+    const locale = useSelector((state: GlobalState) => {
+        const {currentUserId, profiles} = state.entities.users;
+        return profiles[currentUserId]?.locale || 'en';
+    });
+
+    return <>{getThreadLabel(locale)}</>;
+};
+
 export default class Plugin {
     public initialize(registry: PluginRegistry, store: Store<GlobalState>): void {
         registry.registerReducer(reducer);
@@ -42,7 +52,7 @@ export default class Plugin {
         registry.registerPostTypeComponent(QUOTED_REPLY_POST_TYPE, QuotedReplyPost);
 
         registry.registerPostDropdownMenuAction(
-            'Thread',
+            <ThreadMenuLabel/>,
             (postId: string) => {
                 const post = getPostFromStore(store, postId);
                 if (post) {
@@ -63,14 +73,17 @@ export default class Plugin {
             }
 
             if (post.channel_id !== pendingReply.channelId) {
+                clearPendingReply(store);
                 return {post};
             }
 
             if (pendingReply.context === 'channel') {
                 if (post.root_id) {
+                    clearPendingReply(store);
                     return {post};
                 }
             } else if ((post.root_id || '') !== pendingReply.rootId) {
+                clearPendingReply(store);
                 return {post};
             }
 

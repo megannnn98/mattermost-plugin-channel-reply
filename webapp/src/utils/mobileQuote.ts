@@ -4,8 +4,8 @@ import type {Store} from 'redux';
 import {QUOTED_REPLY_BODY_PROP, QUOTED_REPLY_POST_TYPE, QUOTED_REPLY_PROP} from '../constants';
 import {getDisplayName, getPostFromState, getUserFromState, getQuotedPostDisplayMessage, truncateMessage} from './posts';
 
-export function formatMobileQuoteBlock(authorName: string, quotedMessage: string): string {
-    const author = authorName.trim() || 'Unknown user';
+export function formatMobileQuoteBlock(authorName: string | undefined, quotedMessage: string): string {
+    const author = authorName?.trim() || 'Unknown user';
     const message = truncateMessage(quotedMessage || 'Attachment', 500);
     const messageLines = message.split('\n').map((line) => `> ${line}`);
 
@@ -23,7 +23,7 @@ export function buildQuotedReplyPost(post: Post, replyToPostId: string, store: S
 
     return {
         ...post,
-        type: QUOTED_REPLY_POST_TYPE,
+        type: QUOTED_REPLY_POST_TYPE as Post['type'],
         message: mobileQuote ? `${mobileQuote}\n\n${replyBody}` : replyBody,
         props: {
             ...post.props,

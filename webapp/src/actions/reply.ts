@@ -31,15 +31,26 @@ function focusComposer(context: ReplyContext): void {
         'textarea#post_textbox',
     ];
 
-    window.setTimeout(() => {
+    let attempts = 0;
+    const tryFocus = () => {
         for (const selector of selectors) {
             const element = document.querySelector(selector) as HTMLElement | null;
             if (element) {
                 element.focus();
-                break;
+                return;
             }
         }
-    }, 250);
+
+        attempts += 1;
+        if (attempts < 10) {
+            window.setTimeout(tryFocus, 100);
+            return;
+        }
+
+        console.warn(`Quoted reply composer not found: ${selectors.join(', ')}`);
+    };
+
+    tryFocus();
 }
 
 export function setPendingReply(store: Store, pendingReply: PendingReply | null): void {
@@ -84,9 +95,23 @@ export async function startReplyToPost(
     setPendingReply(store, pendingReply);
 
     if (context === 'thread') {
-        const opened = await openThreadForPost(store, post.id);
+        let opened = false;
+        try {
+            opened = await openThreadForPost(store, post.id);
+        } catch (error) {
+            console.error(
+                `Quoted reply failed to open thread for post ${post.id}:`,
+                error instanceof Error ? error.message : String(error),
+            );
+        }
+
+        if (!opened) {
+            clearPendingReply(store);
+            return false;
+        }
+
         focusComposer('thread');
-        return opened;
+        return true;
     }
 
     closeRhs(store);

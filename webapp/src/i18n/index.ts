@@ -3,7 +3,7 @@ const THREAD_TRANSLATION_KEYS = [
     'post_info.comment_icon.tooltip.reply',
 ] as const;
 
-function getThreadLabel(locale: string): string {
+export function getThreadLabel(locale: string): string {
     return locale.toLowerCase().startsWith('ru') ? 'Тред' : 'Thread';
 }
 

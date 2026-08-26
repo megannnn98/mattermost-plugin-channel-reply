@@ -1,8 +1,10 @@
 import React, {useState} from 'react';
+import {useStore} from 'react-redux';
 
 import type {Post} from '@mattermost/types/posts';
 import type {UserProfile} from '@mattermost/types/users';
 
+import {getSiteUrl} from '../actions/navigateToPost';
 import {
     getQuotedPostDisplayMessage,
     getUserAvatarFallbackUrl,
@@ -26,7 +28,9 @@ const ReplyQuoteAvatar: React.FC<{
     username: string;
     compact?: boolean;
 }> = ({user, username, compact = false}) => {
-    const avatarUrl = getUserAvatarUrl(user);
+    const store = useStore();
+    const siteUrl = getSiteUrl(store);
+    const avatarUrl = getUserAvatarUrl(user, siteUrl);
     const [showInitials, setShowInitials] = useState(!avatarUrl);
 
     if (!user) {
@@ -55,7 +59,7 @@ const ReplyQuoteAvatar: React.FC<{
             src={avatarUrl || undefined}
             alt={`${username} profile picture`}
             onError={(event) => {
-                const fallbackUrl = getUserAvatarFallbackUrl(user);
+                const fallbackUrl = getUserAvatarFallbackUrl(user, siteUrl);
                 if (fallbackUrl && event.currentTarget.src !== fallbackUrl) {
                     event.currentTarget.src = fallbackUrl;
                     return;
@@ -102,6 +106,7 @@ const ReplyQuote: React.FC<Props> = ({
                 aria-hidden='true'
             />
             <ReplyQuoteAvatar
+                key={user?.id}
                 user={user}
                 username={username}
                 compact={compact}
