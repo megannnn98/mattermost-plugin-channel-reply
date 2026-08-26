@@ -87,7 +87,8 @@ function stripMobileQuotePrefix(message: string): string {
     }
 
     const prefix = message.slice(0, separatorIndex);
-    if (!prefix.split('\n').every((line) => line.startsWith('> '))) {
+    const lines = prefix.split('\n');
+    if (!/^> \*\*.+\*\*$/.test(lines[0]) || !lines.every((line) => line.startsWith('> '))) {
         return message;
     }
 
