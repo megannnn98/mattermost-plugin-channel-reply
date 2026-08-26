@@ -1,7 +1,7 @@
 import React from 'react';
 import {Provider} from 'react-redux';
 import {createStore} from 'redux';
-import {render, screen} from '@testing-library/react';
+import {act, render, screen} from '@testing-library/react';
 
 import type {Post} from '@mattermost/types/posts';
 
@@ -12,22 +12,29 @@ import {PLUGIN_STATE_KEY} from '../types/store';
 const source = {id: 'source', channel_id: 'channel', user_id: 'user', message: 'Original'} as unknown as Post;
 const reply = {id: 'reply', channel_id: 'channel', message: '> **Alice**\n> Original\n\nReply', props: {quoted_reply_to: 'source'}, type: 'custom_quoted_reply'} as unknown as Post;
 
-function renderState(node: React.ReactElement, pluginState: unknown = {pendingReply: null}) {
+function renderState(node: React.ReactElement, pluginState: unknown = {pendingReply: null}, currentChannelId = 'channel') {
     const state = {
         entities: {
             general: {config: {SiteURL: 'https://mm'}},
-            channels: {currentChannelId: 'channel', channels: {channel: {team_id: 'team'}}},
+            channels: {currentChannelId, channels: {channel: {team_id: 'team'}}},
             teams: {currentTeamId: 'team', teams: {team: {name: 'team'}}},
             posts: {posts: {source}}, users: {profiles: {user: {id: 'user', username: 'alice'}}},
         },
         [PLUGIN_STATE_KEY]: pluginState,
     };
-    return render(<Provider store={createStore((current = state) => current)}>{node}</Provider>);
+    const store = createStore((current = state) => current);
+    const dispatch = jest.spyOn(store, 'dispatch');
+    return {dispatch, store, ...render(<Provider store={store}>{node}</Provider>)};
 }
 
 describe('reply rendering', () => {
     beforeEach(() => {
         window.PostUtils = {formatText: jest.fn((message) => message), messageHtmlToComponent: jest.fn((html) => <strong>{html}</strong>)};
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+        jest.useRealTimers();
     });
 
     it('renders quoted post body through Mattermost formatter', () => {
@@ -44,5 +51,30 @@ describe('reply rendering', () => {
         const pending = {replyToPostId: 'source', channelId: 'channel', rootId: '', context: 'channel'};
         renderState(<ReplyComposerPreview/>, {pendingReply: pending});
         expect(document.querySelector('.quoted-reply-composer-preview')).toBeInTheDocument();
+    });
+
+    it('clears pending reply when the target is absent or the channel changes', () => {
+        jest.useFakeTimers();
+        const pending = {replyToPostId: 'source', channelId: 'channel', rootId: '', context: 'channel'};
+        const missingTarget = renderState(<ReplyComposerPreview/>, {pendingReply: pending});
+        act(() => jest.advanceTimersByTime(10000));
+        expect(missingTarget.dispatch).toHaveBeenCalledWith({type: expect.stringContaining('CLEAR_PENDING_REPLY')});
+
+        const changedChannel = renderState(<ReplyComposerPreview/>, {pendingReply: pending}, 'other');
+        expect(changedChannel.dispatch).toHaveBeenCalledWith({type: expect.stringContaining('CLEAR_PENDING_REPLY')});
+    });
+
+    it('clears pending reply after repeated preview host detachments', async () => {
+        document.body.insertAdjacentHTML('beforeend', '<div id="post-create"><div class="AdvancedTextEditor__cell"></div></div>');
+        const target = document.querySelector('.AdvancedTextEditor__cell') as HTMLElement;
+        const pending = {replyToPostId: 'source', channelId: 'channel', rootId: '', context: 'channel'};
+        const view = renderState(<ReplyComposerPreview/>, {pendingReply: pending});
+
+        for (let index = 0; index <= 20; index += 1) {
+            act(() => target.querySelector('.quoted-reply-composer-host')?.remove());
+            await act(async () => Promise.resolve());
+        }
+
+        expect(view.dispatch).toHaveBeenCalledWith({type: expect.stringContaining('CLEAR_PENDING_REPLY')});
     });
 });

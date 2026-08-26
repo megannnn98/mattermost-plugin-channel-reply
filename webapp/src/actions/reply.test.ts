@@ -7,7 +7,10 @@ jest.mock('./openThread', () => ({openThreadForPost: jest.fn(async () => true)})
 const post = {id: 'post', channel_id: 'channel', root_id: 'root'} as unknown as Post;
 
 describe('reply actions', () => {
-    beforeEach(() => jest.useFakeTimers());
+    beforeEach(() => {
+        document.body.innerHTML = '';
+        jest.useFakeTimers();
+    });
     afterEach(() => jest.useRealTimers());
 
     it('sets and clears pending state and detects thread DOM', () => {
@@ -18,15 +21,18 @@ describe('reply actions', () => {
         expect(dispatch).toHaveBeenCalledTimes(2);
         expect(getPendingReply({getState: () => ({})} as never)).toBeNull();
         const element = document.createElement('button');
-        document.body.append(element);
         expect(isReplyInThreadView(element)).toBe(false);
-        element.closest = jest.fn(() => document.body);
+        const thread = document.createElement('div');
+        thread.className = 'sidebar--right';
+        thread.append(element);
+        document.body.append(thread);
         expect(isReplyInThreadView(element)).toBe(true);
     });
 
     it('starts channel and thread replies', async () => {
         const editor = document.createElement('textarea');
         editor.id = 'post_textbox';
+        const focus = jest.spyOn(editor, 'focus');
         document.body.append(editor);
         const dispatch = jest.fn();
         const store = {dispatch, getState: () => ({})};
@@ -35,5 +41,18 @@ describe('reply actions', () => {
         expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({type: 'UPDATE_RHS_STATE'}));
         await expect(startReplyToPost(store as never, post, {context: 'thread'})).resolves.toBe(true);
         expect(document.querySelector('#post_textbox')).toBe(editor);
+        expect(focus).toHaveBeenCalled();
+    });
+
+    it('retries composer focus until the editor appears', async () => {
+        const store = {dispatch: jest.fn(), getState: () => ({})};
+        await startReplyToPost(store as never, post, {context: 'channel'});
+        const editor = document.createElement('textarea');
+        editor.id = 'post_textbox';
+        const focus = jest.spyOn(editor, 'focus');
+        document.body.append(editor);
+
+        jest.advanceTimersByTime(100);
+        expect(focus).toHaveBeenCalled();
     });
 });

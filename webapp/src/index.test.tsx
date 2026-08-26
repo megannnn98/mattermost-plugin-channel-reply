@@ -30,6 +30,7 @@ describe('Plugin registration', () => {
         store.getState = () => ({...state, 'plugins-com.github.mattermost-channel-reply': {pendingReply: pending}});
         const result = hook({message: 'Reply', channel_id: 'channel', root_id: ''} as Post);
         expect(result.post.type).toBe('custom_quoted_reply');
-        expect(hook({message: 'Other', channel_id: 'other'} as Post)).toEqual({post: expect.anything()});
+        const unmatchedPost = {message: 'Other', channel_id: 'other'} as Post;
+        expect(hook(unmatchedPost)).toEqual({post: unmatchedPost});
     });
 });

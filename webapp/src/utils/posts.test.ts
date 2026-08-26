@@ -21,8 +21,8 @@ describe('getQuotedReplyBody', () => {
         expect(getQuotedReplyBody(post)).toBe('Reply body');
     });
 
-    it('does not strip a user blockquote or trust a non-quoted post', () => {
-        const post = {message: '> user quote\n\nReply', type: '', props: {}} as unknown as Post;
+    it('does not strip a user blockquote in a quoted-reply post', () => {
+        const post = {message: '> user quote\n\nReply', type: 'custom_quoted_reply', props: {}} as unknown as Post;
 
         expect(getQuotedReplyBody(post)).toBe(post.message);
         expect(getQuotedPostDisplayMessage(post)).toBe(post.message);
