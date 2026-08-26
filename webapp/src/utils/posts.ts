@@ -37,20 +37,20 @@ export function getDisplayName(user?: UserProfile): string {
     return user.username;
 }
 
-export function getUserAvatarUrl(user?: UserProfile): string | null {
+export function getUserAvatarUrl(user: UserProfile | undefined, siteUrl: string): string | null {
     if (!user?.id) {
         return null;
     }
 
-    return `/api/v4/users/${user.id}/image?_=${user.last_picture_update || 0}`;
+    return `${siteUrl.replace(/\/$/, '')}/api/v4/users/${user.id}/image?_=${user.last_picture_update || 0}`;
 }
 
-export function getUserAvatarFallbackUrl(user?: UserProfile): string | null {
+export function getUserAvatarFallbackUrl(user: UserProfile | undefined, siteUrl: string): string | null {
     if (!user?.id) {
         return null;
     }
 
-    return `/api/v4/users/${user.id}/image/default`;
+    return `${siteUrl.replace(/\/$/, '')}/api/v4/users/${user.id}/image/default`;
 }
 
 export function getUserInitials(user?: UserProfile): string {

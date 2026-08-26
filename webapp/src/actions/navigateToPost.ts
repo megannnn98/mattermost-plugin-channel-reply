@@ -95,7 +95,7 @@ function tryNavigateWithinOpenThread(store: Store, post: Post): boolean {
     return true;
 }
 
-function getSiteUrl(store: Store): string {
+export function getSiteUrl(store: Store): string {
     const state = store.getState() as MattermostState;
     return state.entities.general.config.SiteURL || window.location.origin;
 }
@@ -188,6 +188,6 @@ export async function navigateToQuotedPost(store: Store, postId: string): Promis
         return true;
     }
 
-    window.location.assign(permalinkPath);
+    window.location.assign(`${getSiteUrl(store).replace(/\/$/, '')}${permalinkPath}`);
     return true;
 }
