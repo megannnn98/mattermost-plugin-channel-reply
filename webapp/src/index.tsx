@@ -12,7 +12,7 @@ import QuotedReplyPost from './components/QuotedReplyPost';
 import QuotedReplyStyles from './components/QuotedReplyStyles';
 import {QUOTED_REPLY_POST_TYPE} from './constants';
 import {buildQuotedReplyPost} from './utils/mobileQuote';
-import {getTranslationsForLocale} from './i18n';
+import {getThreadLabel, getTranslationsForLocale} from './i18n';
 import {clearPendingReply, getPendingReply, startReplyToPost} from './actions/reply';
 import {getPostFromStore, isReplyablePost} from './actions/openThread';
 
@@ -42,7 +42,9 @@ export default class Plugin {
         registry.registerPostTypeComponent(QUOTED_REPLY_POST_TYPE, QuotedReplyPost);
 
         registry.registerPostDropdownMenuAction(
-            'Thread',
+            getThreadLabel(
+                store.getState().entities.users.profiles[store.getState().entities.users.currentUserId]?.locale || 'en',
+            ),
             (postId: string) => {
                 const post = getPostFromStore(store, postId);
                 if (post) {
